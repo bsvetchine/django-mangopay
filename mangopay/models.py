@@ -465,6 +465,7 @@ class MangoPayCardRegistration(models.Model):
         client = get_mangopay_api_client()
         card_registration = client.cardRegistrations.Get(self.mangopay_id)
         preregistration_data = {
+            "Id": self.mangopay_id,
             "preregistrationData": card_registration.PreregistrationData,
             "accessKey": card_registration.AccessKey,
             "cardRegistrationURL": card_registration.CardRegistrationURL}
@@ -473,6 +474,15 @@ class MangoPayCardRegistration(models.Model):
     def save_mangopay_card_id(self, mangopay_card_id):
         self.mangopay_card.mangopay_id = mangopay_card_id
         self.mangopay_card.save()
+
+    @property
+    def is_registered(self):
+        try:
+            if self.mangopay_card.mangopay_id:
+                return True
+        except AttributeError:  # mangopay_card not created yet
+            pass
+        return False
 
     def save(self, *args, **kwargs):
         if not self.mangopay_card:
